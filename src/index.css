@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "DM Mono", monospace;
+
+  --color-wood-dark: #2B251F;
+  --color-paper-aged: #E4D5B7;
+  --color-brass-polished: #D4AF37;
+  --color-leather-brown: #8E5E38;
+  --color-iron-cold: #4B5358;
+  --color-fire-rebellion: #C83E2D;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-wood-dark);
+    background-image: linear-gradient(rgba(12, 9, 7, 0.9), rgba(12, 9, 7, 0.92)), url('/assets/images/victorian_mill_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--color-paper-aged);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-wood-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-leather-brown);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brass-polished);
+}
+
+/* Woodcut Border Effect */
+.woodcut-border {
+  border: 4px double var(--color-leather-brown);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.woodcut-border-brass {
+  border: 4px double var(--color-brass-polished);
+  box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.1), 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.woodcut-border-iron {
+  border: 4px double var(--color-iron-cold);
+  box-shadow: inset 0 0 15px rgba(75, 83, 88, 0.15), 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Glassmorphism panel for Victorian UI */
+.glass-panel {
+  background: rgba(43, 37, 31, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(228, 213, 183, 0.15);
+}
+
+/* Keyframes for steam gauge vibrations */
+@keyframes shake-gentle {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(0.5px, 0.5px) rotate(0.1deg); }
+  50% { transform: translate(-0.5px, 0.5px) rotate(-0.1deg); }
+  75% { transform: translate(-0.5px, -0.5px) rotate(0.1deg); }
+}
+
+.shake-gentle {
+  animation: shake-gentle 0.5s infinite ease-in-out;
+}
+
+@keyframes steam-puff {
+  0% { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(-30px) scale(1.5) rotate(15deg); opacity: 0; }
+}
+
+.steam-puff-effect {
+  animation: steam-puff 1.5s infinite ease-out;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) scale(1.3); opacity: 0; }
+}
+.animate-float-up {
+  animation: floatUp 1.2s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+}
+
+@keyframes flashLevelUp {
+  0% { background-color: rgba(212, 175, 55, 0.4); box-shadow: 0 0 50px rgba(212, 175, 55, 0.8); }
+  100% { background-color: transparent; box-shadow: none; }
+}
+.animate-flash {
+  animation: flashLevelUp 0.8s ease-out forwards;
+}
+
+@keyframes shakeConflict {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px) rotate(-1deg); }
+  50% { transform: translateX(4px) rotate(1deg); }
+  75% { transform: translateX(-4px) rotate(-1deg); }
+}
+.animate-shake {
+  animation: shakeConflict 0.5s ease-in-out infinite;
+}
+
+/* === FOIL CARD ANIMATIONS === */
+@keyframes foilShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes foilBorderRotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes foilGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,0.4), 0 0 30px rgba(168,85,247,0.2); }
+  50% { box-shadow: 0 0 25px rgba(212,175,55,0.8), 0 0 50px rgba(168,85,247,0.5), 0 0 80px rgba(96,165,250,0.2); }
+}
+
+.foil-card {
+  position: relative;
+  animation: foilGlow 2.5s ease-in-out infinite;
+}
+
+.foil-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    #D4AF37 0%,
+    #a855f7 25%,
+    #60a5fa 50%,
+    #D4AF37 75%,
+    #a855f7 100%
+  );
+  background-size: 300% 300%;
+  animation: foilBorderRotate 3s linear infinite;
+  z-index: -1;
+  border-radius: 12px;
+}
+
+.foil-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,0.12) 45%,
+    rgba(255,255,255,0.25) 50%,
+    rgba(255,255,255,0.12) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: foilShimmer 2s linear infinite;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.foil-badge {
+  background: linear-gradient(90deg, #D4AF37, #a855f7, #D4AF37);
+  background-size: 200% auto;
+  animation: foilShimmer 1.5s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.foil-title {
+  background: linear-gradient(90deg, #D4AF37 0%, #f9d979 40%, #a855f7 70%, #D4AF37 100%);
+  background-size: 200% auto;
+  animation: foilShimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Combo progress animations */
+@keyframes comboActivate {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.animate-combo-activate {
+  animation: comboActivate 0.5s ease-out forwards;
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to { width: var(--progress-width, 100%); }
+}
+
+/* 3D Flashcard Utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+.perspective-1000 {
+  perspective: 1000px;
+}
