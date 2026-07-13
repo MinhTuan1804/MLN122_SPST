@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
-import type { ChatMessage } from '../store/gameStore';
 import { X, Send, HelpCircle, Loader2, MessageSquare } from 'lucide-react';
 import type { Advisor } from '../data/advisors';
 
@@ -17,8 +16,7 @@ export const AdvisorChatModal: React.FC<AdvisorChatModalProps> = ({ isOpen, onCl
     phase,
     advisorChatHistory,
     advisorChatTokens,
-    askAdvisor,
-    addSystemMessage
+    askAdvisor
   } = useGameStore();
 
   const [input, setInput] = useState('');

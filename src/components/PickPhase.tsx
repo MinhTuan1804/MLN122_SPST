@@ -22,7 +22,6 @@ export const PickPhase: React.FC = () => {
     playerLevel,
     playerXp,
     buyXp,
-    pickedCardIds,
     aiPersonality,
     activeAdvisor,
   } = useGameStore();

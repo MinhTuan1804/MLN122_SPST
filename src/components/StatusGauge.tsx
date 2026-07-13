@@ -10,7 +10,7 @@ interface StatusGaugeProps {
 }
 
 export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, icon, previewValue }) => {
-  const { faction, currentTurnState, academicMode, phase } = useGameStore();
+  const { faction, currentTurnState, phase } = useGameStore();
 
   const [displayValue, setDisplayValue] = useState(value);
 
@@ -48,10 +48,8 @@ export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, ic
 
   // Generate mathematically precise concentric circular arc path segment
   const getArcPath = (startVal: number, endVal: number, radius: number = 37) => {
-    const startAngle = minAngle;
-    // Draw up to displayValue
-    const actualEndVal = Math.min(100, Math.max(0, displayValue));
-    const endAngle = minAngle + (actualEndVal / 100) * (maxAngle - minAngle);
+    const startAngle = minAngle + (startVal / 100) * (maxAngle - minAngle);
+    const endAngle = minAngle + (endVal / 100) * (maxAngle - minAngle);
     
     const radStart = ((startAngle - 90) * Math.PI) / 180;
     const radEnd = ((endAngle - 90) * Math.PI) / 180;

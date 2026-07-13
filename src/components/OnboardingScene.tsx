@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { ArrowRight, BookOpen, Clock, Activity, Coins, Heart, Handshake, Users, ShieldAlert, Zap, Settings, AlertTriangle, Landmark, Skull } from 'lucide-react';
+import { ArrowRight, Coins, Users, Settings, AlertTriangle, Landmark, Skull } from 'lucide-react';
 import { AdvisorSelectModal } from './AdvisorSelectModal';
 import { StatusGauge } from './StatusGauge';
 import { mapToDisplayIndicators } from '../data/displayMapping';
 import { getInitialTurnState } from '../logic/economyFormulas';
 
 export const OnboardingScene: React.FC = () => {
-  const { faction, completeOnboarding } = useGameStore();
+  const { faction } = useGameStore();
   const [step, setStep] = useState<'intro' | 'rules' | 'advisor'>('intro');
   
   // Starting indicators for onboarding preview

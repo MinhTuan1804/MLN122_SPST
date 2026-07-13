@@ -19,7 +19,7 @@ import { TurnSummary } from './components/TurnSummary';
 import { GameRulesModal } from './components/GameRulesModal';
 import { TermTooltip } from './components/TermTooltip';
 import { calculateTurnResult } from './logic/economyFormulas';
-import { Settings, Users, Coins, Flame, Handshake, Zap, Sparkles, AlertCircle, AlertTriangle, Briefcase, Volume2, VolumeX, ShoppingBag, BookOpen, ChevronRight, Link as LinkIcon, Megaphone, Landmark, MessageSquare } from 'lucide-react';
+import { Settings, Users, Coins, Flame, Handshake, Zap, Sparkles, AlertCircle, AlertTriangle, Briefcase, Volume2, VolumeX, BookOpen, ChevronRight, Link as LinkIcon, Megaphone, Landmark } from 'lucide-react';
 import { playHoverSound, playClickSound } from './utils/audioEffects';
 import { AdvisorChatModal } from './components/AdvisorChatModal';
 import { AdvisorHintBadge } from './components/AdvisorHintBadge';
@@ -163,27 +163,6 @@ const App: React.FC = () => {
   const demandRatio = currentTurnState.socialValue > 0 ? Math.min(1.0, currentTurnState.aggregateDemand / currentTurnState.socialValue) : 1.0;
 
   const activeSynergies = getActiveSynergies();
-
-  const getFactionColors = () => {
-    if (faction === 'capitalist') {
-      return {
-        accent: 'text-brass-polished border-brass-polished',
-        border: 'woodcut-border-brass',
-        glow: 'shadow-[inset_0_0_20px_rgba(212,175,55,0.05)]',
-        headerText: 'text-brass-polished',
-        panelBg: 'bg-[#29221B]/40',
-      };
-    }
-    return {
-      accent: 'text-iron-cold border-iron-cold',
-      border: 'woodcut-border-iron',
-      glow: 'shadow-[inset_0_0_20px_rgba(75,83,88,0.05)]',
-      headerText: 'text-iron-cold',
-      panelBg: 'bg-[#202528]/40',
-    };
-  };
-
-  const theme = getFactionColors();
 
   // 1. Lobby Phase: Faction Selection
   if (phase === 'lobby') {
