@@ -1096,7 +1096,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Call Gemini 2.5 Flash API
-    const activeKey = geminiKey || localStorage.getItem('gemini_api_key') || '';
+    const activeKey = geminiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key') || '';
     
     const { getAdvisorsForFaction } = await import('../data/advisors');
     const allAdvisors = [...getAdvisorsForFaction('capitalist'), ...getAdvisorsForFaction('worker')];
