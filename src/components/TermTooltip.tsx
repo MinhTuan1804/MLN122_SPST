@@ -71,6 +71,8 @@ const TERMS: Record<string, string> = {
     "Thể trạng của công nhân. Nếu giảm xuống 0, phong trào đấu tranh sẽ sụp đổ.",
   health:
     "Thể trạng của công nhân. Nếu giảm xuống 0, phong trào đấu tranh sẽ sụp đổ.",
+  "độc quyền thị trường":
+    "Tỷ lệ phần trăm thị phần sản xuất dệt mà nhà tư bản cần chiếm lĩnh (đạt tối thiểu 65%) ở lượt 15 để khẳng định vị thế độc quyền kiểm soát giá cả.",
   "thị phần":
     "Độ bao phủ thị trường của Tư bản. Ảnh hưởng trực tiếp đến doanh thu và uy tín.",
   "ngân quỹ tích lũy (capital)":

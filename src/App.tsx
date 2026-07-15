@@ -394,6 +394,7 @@ const App: React.FC = () => {
                 label="Kinh tế"
                 value={displayIndicators.economicPower}
                 previewValue={previewIndicators?.economicPower}
+                previewState={previewState}
                 type="economic"
                 icon={<Coins className="w-4 h-4 text-brass-polished" />}
               />
@@ -403,6 +404,7 @@ const App: React.FC = () => {
                 label="Áp lực"
                 value={displayIndicators.enginePressure}
                 previewValue={previewIndicators?.enginePressure}
+                previewState={previewState}
                 type="pressure"
                 icon={<Settings className="w-4 h-4 text-fire-rebellion" />}
               />
@@ -412,6 +414,7 @@ const App: React.FC = () => {
                 label="Xã hội"
                 value={displayIndicators.socialDurability}
                 previewValue={previewIndicators?.socialDurability}
+                previewState={previewState}
                 type="social"
                 icon={<Users className="w-4 h-4 text-emerald-400" />}
               />
@@ -558,10 +561,10 @@ const App: React.FC = () => {
         </div>
 
         {/* Center/Right Column: ARENA (3D Scene + Floating UI) */}
-        <div className="col-span-12 lg:col-span-9 relative rounded-xl border-2 overflow-hidden flex flex-col min-h-[600px] border-paper-aged/20">
+        <div className="col-span-12 lg:col-span-9 relative rounded-xl border-2 flex flex-col min-h-[600px] border-paper-aged/20">
           
           {/* Background Layer: 3D/2D Conflict Scene */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute inset-0 z-0 pointer-events-none rounded-xl overflow-hidden">
             {enable3D ? <ConflictScene /> : <ConflictSceneFallback2D />}
           </div>
 

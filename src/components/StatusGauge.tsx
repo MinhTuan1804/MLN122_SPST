@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import type { TurnState } from '../types/economy';
 
 interface StatusGaugeProps {
   label: string;
@@ -7,9 +8,10 @@ interface StatusGaugeProps {
   type: 'economic' | 'pressure' | 'social';
   icon: React.ReactNode;
   previewValue?: number; // Predicted value on card hover
+  previewState?: TurnState | null; // Predicted state on card hover
 }
 
-export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, icon, previewValue }) => {
+export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, icon, previewValue, previewState }) => {
   const { faction, currentTurnState, phase } = useGameStore();
 
   const [displayValue, setDisplayValue] = useState(value);
@@ -46,6 +48,33 @@ export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, ic
   const hasPreview = previewValue !== undefined && previewValue !== value;
   const previewAngle = hasPreview ? minAngle + ((previewValue || 0) / 100) * (maxAngle - minAngle) : angle;
 
+  const getGaugeColor = () => {
+    if (type === 'pressure') {
+      if (value < 40) return '#10B981'; // Green
+      if (value < 75) return '#D4AF37'; // Amber
+      return '#EF4444'; // Red
+    }
+    // For economic and social, higher is better
+    if (value > 65) return '#10B981';
+    if (value > 35) return '#D4AF37';
+    return '#EF4444';
+  };
+
+  const getPreviewColor = () => {
+    if (previewValue === undefined) return '#D4AF37';
+    if (type === 'pressure') {
+      return (previewValue || 0) > value ? '#EF4444' : '#10B981'; // Red if tension rises, green if drops
+    }
+    return (previewValue || 0) > value ? '#10B981' : '#EF4444'; // Green if stats rise, red if drop
+  };
+
+  const getNeedleColor = () => {
+    if (hasPreview) {
+      return getPreviewColor();
+    }
+    return getGaugeColor();
+  };
+
   // Generate mathematically precise concentric circular arc path segment
   const getArcPath = (startVal: number, endVal: number, radius: number = 37) => {
     const startAngle = minAngle + (startVal / 100) * (maxAngle - minAngle);
@@ -76,93 +105,131 @@ export const StatusGauge: React.FC<StatusGaugeProps> = ({ label, value, type, ic
     return faction === 'capitalist' ? 'Danh tiếng chủ xưởng' : 'Sức khỏe & Ý thức';
   };
 
-  // Set colors based on gauge type and value
-  const getNeedleColor = () => {
-    if (type === 'pressure') {
-      if (value > 75) return '#C83E2D'; // Dangerous red
-      if (value > 45) return '#D4AF37'; // Warning brass
-      return '#4B5358'; // Normal iron
-    } else {
-      if (value < 25) return '#C83E2D'; // Low health/reputation/wealth is bad
-      if (value < 55) return '#D4AF37';
-      return '#D4AF37'; // Polished brass for good state
-    }
-  };
-
   const getGaugeBorder = () => {
     if (faction === 'capitalist') return 'border-brass-polished text-brass-polished';
     return 'border-iron-cold text-paper-aged';
   };
 
-  const getPreviewColor = () => {
-    if (previewValue === undefined) return '#D4AF37';
-    if (type === 'pressure') {
-      return previewValue > value ? '#EF4444' : '#10B981'; // Red if tension rises, green if drops
-    }
-    return previewValue > value ? '#10B981' : '#EF4444'; // Green if stats rise, red if drop
-  };
-
   // Generate Marxist Academic Tooltip explanation
   const getAcademicTooltip = () => {
     const { constantCapital, variableCapital, surplusValue, organicComposition, conflictRate, workerHealth, classConsciousness, unionFund, capital, marketShare, reputation } = currentTurnState;
-    const mPrime = variableCapital > 0 ? Math.round((surplusValue / variableCapital) * 100) : 0;
     
     switch (type) {
       case 'economic':
         if (faction === 'capitalist') {
+          const capScore = Math.round(Math.min(100, (capital / 15000) * 50));
+          const mktScore = marketShare;
+          const currentCalc = Math.round(capScore * 0.6 + mktScore * 0.4);
+          
           return (
-            <div className="text-left space-y-1">
-              <p className="font-serif border-b border-brass-polished/30 pb-1 text-brass-polished">Tài sản & Thị trường (Tư bản)</p>
-              <p><span className="text-brass-polished/80">Tích lũy Tư bản (Capital):</span> {capital} £</p>
-              <p><span className="text-brass-polished/80">Thị phần (Market Share):</span> {marketShare}%</p>
-              <p className="pt-1 text-xs italic border-t border-brass-polished/20 text-paper-aged/70">
+            <div className="text-left space-y-1.5 text-[10px] sm:text-xs">
+              <p className="font-serif border-b border-brass-polished/30 pb-1 text-brass-polished font-bold">Kinh Tế (Tư Bản)</p>
+              <p className="font-semibold text-brass-polished/90">Công thức: (Điểm Vốn × 60%) + (Thị phần × 40%)</p>
+              <div className="bg-[#15110E] p-1.5 rounded border border-leather-brown/10 font-mono text-[9px] leading-tight space-y-0.5 text-paper-aged/80">
+                <p>• Điểm Vốn = Min(100, ({capital} / 15000) × 50) = {capScore}%</p>
+                <p>• Thị phần = {mktScore}%</p>
+                <p className="text-amber-400">• Hiện tại: ({capScore}% × 0.6) + ({mktScore}% × 0.4) = {currentCalc}%</p>
+                {previewState && (
+                  <>
+                    <p className="border-t border-leather-brown/10 mt-1 pt-1 text-paper-aged/40">Dự kiến sau khi chọn thẻ:</p>
+                    <p>• Vốn: {previewState.capital} £ → {Math.round(Math.min(100, (previewState.capital / 15000) * 50))}%</p>
+                    <p>• Thị phần: {previewState.marketShare}%</p>
+                    <p className="text-red-400">• Dự kiến: ({Math.round(Math.min(100, (previewState.capital / 15000) * 50))}% × 0.6) + ({previewState.marketShare}% × 0.4) = {previewValue}%</p>
+                  </>
+                )}
+              </div>
+              <p className="text-[9px] text-paper-aged/50 leading-normal">
                 W = c + v + m. Giá trị thặng dư (m = {surplusValue} £) được tích lũy trực tiếp vào Tư bản.
               </p>
             </div>
           );
         } else {
+          const fundScore = Math.round(Math.min(100, (unionFund / 3000) * 60));
+          const solidarityScore = currentTurnState.solidarityNetwork;
+          const currentCalc = Math.round(fundScore * 0.5 + solidarityScore * 0.5);
+          
           return (
-            <div className="text-left space-y-1">
-              <p className="font-serif border-b border-iron-cold/30 pb-1 text-iron-cold">Quỹ Đấu tranh Công nhân</p>
-              <p><span className="text-iron-cold/80">Quỹ Công đoàn (Union Fund):</span> {unionFund} £</p>
-              <p><span className="text-iron-cold/80">Mạng lưới Đoàn kết (Solidarity):</span> {currentTurnState.solidarityNetwork}%</p>
-              <p className="pt-1 text-xs italic border-t border-iron-cold/20 text-paper-aged/70">
-                Nguồn lực tài chính độc lập giúp công nhân duy trì bãi công mà không bị bỏ đói.
-              </p>
+            <div className="text-left space-y-1.5 text-[10px] sm:text-xs">
+              <p className="font-serif border-b border-iron-cold/30 pb-1 text-iron-cold font-bold">Kinh Tế (Công Nhân)</p>
+              <p className="font-semibold text-iron-cold/90">Công thức: (Điểm Quỹ × 50%) + (Đoàn kết × 50%)</p>
+              <div className="bg-[#15110E] p-1.5 rounded border border-leather-brown/10 font-mono text-[9px] leading-tight space-y-0.5 text-paper-aged/80">
+                <p>• Điểm Quỹ = Min(100, ({unionFund} / 3000) × 60) = {fundScore}%</p>
+                <p>• Đoàn kết = {solidarityScore}%</p>
+                <p className="text-emerald-400">• Hiện tại: ({fundScore}% × 0.5) + ({solidarityScore}% × 0.5) = {currentCalc}%</p>
+                {previewState && (
+                  <>
+                    <p className="border-t border-leather-brown/10 mt-1 pt-1 text-paper-aged/40">Dự kiến sau khi chọn thẻ:</p>
+                    <p>• Quỹ: {previewState.unionFund} £ → {Math.round(Math.min(100, (previewState.unionFund / 3000) * 60))}%</p>
+                    <p>• Đoàn kết: {previewState.solidarityNetwork}%</p>
+                    <p className="text-emerald-400">• Dự kiến: ({Math.round(Math.min(100, (previewState.unionFund / 3000) * 60))}% × 0.5) + ({previewState.solidarityNetwork}% × 0.5) = {previewValue}%</p>
+                  </>
+                )}
+              </div>
             </div>
           );
         }
-      case 'pressure':
+      case 'pressure': {
+        const orgCompScore = Math.round(Math.min(100, (organicComposition / 3.0) * 50));
+        const conflictScore = conflictRate;
+        const currentCalc = Math.round(orgCompScore * 0.4 + conflictScore * 0.6);
+        
         return (
-          <div className="text-left space-y-1">
-            <p className="font-serif border-b border-fire-rebellion/30 pb-1 text-fire-rebellion">Áp Lực Hệ Thống & Đấu Tranh</p>
-            <p><span className="text-fire-rebellion/80">Cấu tạo hữu cơ tư bản (oc = c/v):</span> {organicComposition.toFixed(2)}</p>
-            <p><span className="text-fire-rebellion/80">Tỷ lệ mâu thuẫn (Conflict Rate):</span> {conflictRate}%</p>
-            <p className="pt-1 text-xs italic border-t border-fire-rebellion/20 text-paper-aged/70">
-              Cấu tạo hữu cơ tăng tức là máy móc (c = {constantCapital} £) thay thế lao động sống (v = {variableCapital} £), đẩy nhanh thất nghiệp và làm gia tăng xung đột.
-            </p>
+          <div className="text-left space-y-1.5 text-[10px] sm:text-xs">
+            <p className="font-serif border-b border-fire-rebellion/30 pb-1 text-fire-rebellion font-bold">Áp Lực Hệ Thống & Đấu Tranh</p>
+            <p className="font-semibold text-fire-rebellion/90">Công thức: (Điểm Máy móc × 40%) + (Xung đột × 60%)</p>
+            <div className="bg-[#15110E] p-1.5 rounded border border-leather-brown/10 font-mono text-[9px] leading-tight space-y-0.5 text-paper-aged/80">
+              <p>• oc = c / v = {organicComposition.toFixed(2)} (c = {constantCapital} £, v = {variableCapital} £)</p>
+              <p>• Điểm Máy móc = Min(100, (oc / 3.0) × 50) = {orgCompScore}%</p>
+              <p>• Xung đột = {conflictScore}%</p>
+              <p className="text-red-400">• Hiện tại: ({orgCompScore}% × 0.4) + ({conflictScore}% × 0.6) = {currentCalc}%</p>
+              {previewState && (
+                <>
+                  <p className="border-t border-leather-brown/10 mt-1 pt-1 text-paper-aged/40">Dự kiến sau khi chọn thẻ:</p>
+                  <p>• oc mới: {previewState.organicComposition.toFixed(2)} (c = {previewState.constantCapital} £, v = {previewState.variableCapital} £) → {Math.round(Math.min(100, (previewState.organicComposition / 3.0) * 50))}%</p>
+                  <p>• Xung đột mới: {previewState.conflictRate}%</p>
+                  <p className="text-red-400">• Dự kiến: ({Math.round(Math.min(100, (previewState.organicComposition / 3.0) * 50))}% × 0.4) + ({previewState.conflictRate}% × 0.6) = {previewValue}%</p>
+                </>
+              )}
+            </div>
           </div>
         );
+      }
       case 'social':
         if (faction === 'capitalist') {
           return (
-            <div className="text-left space-y-1">
-              <p className="font-serif border-b border-brass-polished/30 pb-1 text-brass-polished">Uy Tín Giai Cấp Thống Trị</p>
-              <p><span className="text-brass-polished/80">Danh tiếng chủ xưởng (Reputation):</span> {reputation}/100</p>
-              <p className="pt-1 text-xs italic border-t border-brass-polished/20 text-paper-aged/70">
-                Độ tín nhiệm trước Nghị viện và giới tư bản lân cận, quyết định khả năng thương lượng xã hội.
-              </p>
+            <div className="text-left space-y-1.5 text-[10px] sm:text-xs">
+              <p className="font-serif border-b border-brass-polished/30 pb-1 text-brass-polished font-bold">Uy Tín Giai Cấp Thống Trị</p>
+              <p className="font-semibold text-brass-polished/90">Công thức: Xã hội = Danh tiếng</p>
+              <div className="bg-[#15110E] p-1.5 rounded border border-leather-brown/10 font-mono text-[9px] leading-tight space-y-0.5 text-paper-aged/80">
+                <p>• Danh tiếng chủ xưởng = {reputation}%</p>
+                {previewState && (
+                  <p className="text-amber-400">• Dự kiến: {previewState.reputation}%</p>
+                )}
+              </div>
             </div>
           );
         } else {
+          const healthScore = workerHealth;
+          const consciousnessScore = classConsciousness;
+          const currentCalc = Math.round(healthScore * 0.6 + consciousnessScore * 0.4);
+          
           return (
-            <div className="text-left space-y-1">
-              <p className="font-serif border-b border-iron-cold/30 pb-1 text-iron-cold">Sức Bền & Ý Thức Giai Cấp</p>
-              <p><span className="text-iron-cold/80">Sức khỏe công nhân (Health):</span> {workerHealth}/100</p>
-              <p><span className="text-iron-cold/80">Ý thức giai cấp (Class Consciousness):</span> {classConsciousness}/100</p>
-              <p className="pt-1 text-xs italic border-t border-iron-cold/20 text-paper-aged/70">
-                Sức khỏe duy trì lực lượng lao động. Ý thức giai cấp đo lường mức độ nhận thức về sự bóc lột thặng dư (m' = {mPrime}%).
-              </p>
+            <div className="text-left space-y-1.5 text-[10px] sm:text-xs">
+              <p className="font-serif border-b border-iron-cold/30 pb-1 text-iron-cold font-bold">Sức Bền & Ý Thức Giai Cấp</p>
+              <p className="font-semibold text-iron-cold/90">Công thức: (Sức khỏe × 60%) + (Ý thức × 40%)</p>
+              <div className="bg-[#15110E] p-1.5 rounded border border-leather-brown/10 font-mono text-[9px] leading-tight space-y-0.5 text-paper-aged/80">
+                <p>• Sức khỏe công nhân = {healthScore}%</p>
+                <p>• Ý thức giai cấp = {consciousnessScore}%</p>
+                <p className="text-emerald-400">• Hiện tại: ({healthScore}% × 0.6) + ({consciousnessScore}% × 0.4) = {currentCalc}%</p>
+                {previewState && (
+                  <>
+                    <p className="border-t border-leather-brown/10 mt-1 pt-1 text-paper-aged/40">Dự kiến sau khi chọn thẻ:</p>
+                    <p>• Sức khỏe: {previewState.workerHealth}%</p>
+                    <p>• Ý thức: {previewState.classConsciousness}%</p>
+                    <p className="text-emerald-400">• Dự kiến: ({previewState.workerHealth}% × 0.6) + ({previewState.classConsciousness}% × 0.4) = {previewValue}%</p>
+                  </>
+                )}
+              </div>
             </div>
           );
         }
