@@ -19,7 +19,7 @@ import { TurnSummary } from './components/TurnSummary';
 import { GameRulesModal } from './components/GameRulesModal';
 import { TermTooltip } from './components/TermTooltip';
 import { calculateTurnResult } from './logic/economyFormulas';
-import { Settings, Users, Coins, Flame, Handshake, Zap, Sparkles, AlertCircle, AlertTriangle, Briefcase, Volume2, VolumeX, BookOpen, ChevronRight, Link as LinkIcon, Megaphone, Landmark } from 'lucide-react';
+import { Settings, Users, Coins, Flame, Handshake, Zap, Sparkles, AlertCircle, AlertTriangle, Briefcase, Volume2, VolumeX, BookOpen, ChevronRight, Link as LinkIcon, Megaphone, Landmark, Calculator } from 'lucide-react';
 import { playHoverSound, playClickSound } from './utils/audioEffects';
 import { AdvisorChatModal } from './components/AdvisorChatModal';
 import { AdvisorHintBadge } from './components/AdvisorHintBadge';
@@ -394,7 +394,6 @@ const App: React.FC = () => {
                 label="Kinh tế"
                 value={displayIndicators.economicPower}
                 previewValue={previewIndicators?.economicPower}
-                previewState={previewState}
                 type="economic"
                 icon={<Coins className="w-4 h-4 text-brass-polished" />}
               />
@@ -404,7 +403,6 @@ const App: React.FC = () => {
                 label="Áp lực"
                 value={displayIndicators.enginePressure}
                 previewValue={previewIndicators?.enginePressure}
-                previewState={previewState}
                 type="pressure"
                 icon={<Settings className="w-4 h-4 text-fire-rebellion" />}
               />
@@ -414,10 +412,95 @@ const App: React.FC = () => {
                 label="Xã hội"
                 value={displayIndicators.socialDurability}
                 previewValue={previewIndicators?.socialDurability}
-                previewState={previewState}
                 type="social"
                 icon={<Users className="w-4 h-4 text-emerald-400" />}
               />
+            </div>
+          </div>
+
+          {/* Dedicated Formulas & Calculations Panel */}
+          <div className="bg-[#1C1814] woodcut-border p-3.5 rounded-xl border border-leather-brown/10 text-paper-aged font-sans text-xs space-y-3 shadow-md">
+            <h3 className="font-serif font-bold text-xs uppercase text-brass-polished tracking-wider border-b border-leather-brown/10 pb-1.5 flex items-center gap-1.5">
+              <Calculator className="w-3.5 h-3.5 text-brass-polished" /> Chi tiết Công thức & Số liệu
+            </h3>
+            
+            {/* Economic Power */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[10px] font-bold text-brass-polished uppercase">
+                <span>💰 Sức mạnh kinh tế</span>
+                <span>{displayIndicators.economicPower}%</span>
+              </div>
+              {faction === 'capitalist' ? (
+                <div className="bg-[#16120F] p-2 rounded font-mono text-[9px] leading-normal space-y-0.5 border border-leather-brown/5 text-paper-aged/80">
+                  <p className="text-paper-aged/40">Kinh tế = (Điểm Vốn × 60%) + (Thị phần × 40%)</p>
+                  <p>• Điểm Vốn = Min(100, ({currentTurnState.capital} / 15000) × 50) = {Math.round(Math.min(100, (currentTurnState.capital / 15000) * 50))}%</p>
+                  <p>• Thị phần = {currentTurnState.marketShare}%</p>
+                  <p className="text-amber-400 font-bold">• Hiện tại: ({Math.round(Math.min(100, (currentTurnState.capital / 15000) * 50))}% × 0.6) + ({currentTurnState.marketShare}% × 0.4) = {displayIndicators.economicPower}%</p>
+                  {previewIndicators && (
+                    <p className="text-red-400 border-t border-leather-brown/5 mt-1 pt-1 font-bold">• Sau khi chọn thẻ: {previewIndicators.economicPower}%</p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#16120F] p-2 rounded font-mono text-[9px] leading-normal space-y-0.5 border border-leather-brown/5 text-paper-aged/80">
+                  <p className="text-paper-aged/40">Kinh tế = (Điểm Quỹ × 50%) + (Đoàn kết × 50%)</p>
+                  <p>• Điểm Quỹ = Min(100, ({currentTurnState.unionFund} / 3000) × 60) = {Math.round(Math.min(100, (currentTurnState.unionFund / 3000) * 60))}%</p>
+                  <p>• Đoàn kết = {currentTurnState.solidarityNetwork}%</p>
+                  <p className="text-emerald-400 font-bold">• Hiện tại: ({Math.round(Math.min(100, (currentTurnState.unionFund / 3000) * 60))}% × 0.5) + ({currentTurnState.solidarityNetwork}% × 0.5) = {displayIndicators.economicPower}%</p>
+                  {previewIndicators && (
+                    <p className="text-emerald-400 border-t border-leather-brown/5 mt-1 pt-1 font-bold">• Sau khi chọn thẻ: {previewIndicators.economicPower}%</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Engine Pressure */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[10px] font-bold text-fire-rebellion uppercase">
+                <span>⚙️ Áp lực hệ thống</span>
+                <span>{displayIndicators.enginePressure}%</span>
+              </div>
+              <div className="bg-[#16120F] p-2 rounded font-mono text-[9px] leading-normal space-y-0.5 border border-leather-brown/5 text-paper-aged/80">
+                <p className="text-paper-aged/40">Áp lực = (Điểm Máy móc × 40%) + (Xung đột × 60%)</p>
+                <p>• oc = c / v = {currentTurnState.organicComposition.toFixed(2)} (c = {currentTurnState.constantCapital}£, v = {currentTurnState.variableCapital}£)</p>
+                <p>• Điểm Máy móc = Min(100, (oc / 3.0) × 50) = {Math.round(Math.min(100, (currentTurnState.organicComposition / 3.0) * 50))}%</p>
+                <p>• Xung đột = {currentTurnState.conflictRate}%</p>
+                <p className="text-red-400 font-bold">• Hiện tại: ({Math.round(Math.min(100, (currentTurnState.organicComposition / 3.0) * 50))}% × 0.4) + ({currentTurnState.conflictRate}% × 0.6) = {displayIndicators.enginePressure}%</p>
+                {previewIndicators && previewState && (
+                  <div className="border-t border-leather-brown/5 mt-1 pt-1 space-y-0.5">
+                    <p className="text-paper-aged/40">Dự kiến sau khi chọn thẻ:</p>
+                    <p>• oc mới: {previewState.organicComposition.toFixed(2)} → {Math.round(Math.min(100, (previewState.organicComposition / 3.0) * 50))}%</p>
+                    <p>• Xung đột mới: {previewState.conflictRate}%</p>
+                    <p className="text-red-400 font-bold">• Sau khi chọn thẻ: {previewIndicators.enginePressure}%</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Social Durability */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[10px] font-bold text-emerald-400 uppercase">
+                <span>✊ Sức bền xã hội</span>
+                <span>{displayIndicators.socialDurability}%</span>
+              </div>
+              {faction === 'capitalist' ? (
+                <div className="bg-[#16120F] p-2 rounded font-mono text-[9px] leading-normal space-y-0.5 border border-leather-brown/5 text-paper-aged/80">
+                  <p className="text-paper-aged/40">Xã hội = Danh tiếng chủ xưởng</p>
+                  <p>• Danh tiếng = {currentTurnState.reputation}%</p>
+                  {previewIndicators && (
+                    <p className="text-amber-400 border-t border-leather-brown/5 mt-1 pt-1 font-bold">• Sau khi chọn thẻ: {previewIndicators.socialDurability}%</p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#16120F] p-2 rounded font-mono text-[9px] leading-normal space-y-0.5 border border-leather-brown/5 text-paper-aged/80">
+                  <p className="text-paper-aged/40">Xã hội = (Sức khỏe × 60%) + (Ý thức × 40%)</p>
+                  <p>• Sức khỏe = {currentTurnState.workerHealth}%</p>
+                  <p>• Ý thức = {currentTurnState.classConsciousness}%</p>
+                  <p className="text-emerald-400 font-bold">• Hiện tại: ({currentTurnState.workerHealth}% × 0.6) + ({currentTurnState.classConsciousness}% × 0.4) = {displayIndicators.socialDurability}%</p>
+                  {previewIndicators && (
+                    <p className="text-emerald-400 border-t border-leather-brown/5 mt-1 pt-1 font-bold">• Sau khi chọn thẻ: {previewIndicators.socialDurability}%</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
